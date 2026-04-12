@@ -1,26 +1,26 @@
-const mongoose = require('mongoose');
+const mangoose=require('mongoose');
 
-const userSchema = new mongoose.Schema({
-    firstName: {
-        type: String
+const userSchema=new mangoose.Schema({
+    firstName:{
+        type:String,
     },
-    lastName: {
-        type: String
+    lastName:{
+        type:String,
     },
-    emailId: {
-        type: String
+    email:{
+        type:String,
     },
-    password: {
-        type: String
+    password:{
+        type:String,
     },
-    age: {
-        type: Number
+    age:{
+        type:Number,
     },
-    gender: {
-        type: String
-    }
+    gender:{
+        type:String,
+    },
 });
 
-const UserModel = mongoose.model("User", userSchema);
+const UserModel=mangoose.model("user",userSchema); // first name of the model then the schema name
 
-module.exports = { UserModel };
+module.exports = {UserModel};

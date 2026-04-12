@@ -1,0 +1,4 @@
+
+
+this is not a very good method of connecting to server bcoz first server started and then we are connecting to db 
+what is there is error while connecting to db after server started 
