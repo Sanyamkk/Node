@@ -6,7 +6,8 @@ const { UserModel } = require('./models/user');
 const app=express();
 
 
-app.use(express.json()); // this will parse the incoming request body and make it available in req.body
+// this will parse the incoming request body and make it available in req.body
+app.use(express.json()); 
 
 
 // find all users
@@ -55,12 +56,23 @@ app.delete("/user" , async(req , res)=>{
 
 
 // update user by email
-app.patch("/user" , async(req , res)=>{
-    const userId=req.body.userId;
+app.patch("/user/:userId" , async(req , res)=>{
+    const userId=req.params?.userId;
     const data=req.body;
+
+
+    const allowedUpdates=["userId", "gender" , "skills" , "photourl" , "age"]; // these are the fields that the user can update
+    const isupdateAllowed=Object.keys(data).every((update)=>{
+        return allowedUpdates.includes(update); // this will check if all the fields that the user wants to update are in the allowedUpdates array
+    });
+    if(!isupdateAllowed){
+        return res.status(400).send("invalid updates");  // this will return an error if the user tries to update a field that is not in the allowedUpdates array
+    }
     try{
 
         await UserModel.findByIdAndUpdate(userId , data); // this will update the user with the given userId and data
+        returnDocument:"after" // this will return the updated document after the update is done
+        runValidators:true // this will run the validators defined in the schema while updating the document
         console.log(data);
         res.send("user updated successfully");
     }
