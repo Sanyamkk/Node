@@ -1,8 +1,10 @@
 const express=require('express');
 const { connectDB } = require('./config/db');
 const { UserModel } = require('./models/user');
-
-
+const validator=require('validator'); // this is a library that provides validation functions for strings (like email validation, url validation, etc.)
+const {validateSignupData} = require('./utils/signupValidator');
+const bcrypt=require('bcrypt'); // this is a library that provides functions to hash and compare passwords (it uses bcrypt algorithm to hash the passwords)
+const {loginValidation} = require('./utils/loginValidation');
 const app=express();
 
 
@@ -82,19 +84,53 @@ app.patch("/user/:userId" , async(req , res)=>{
 });
 // signup route
 app.post("/signup" , async (req , res)=>{
-    const userobj={
-        firstName:req.body.firstName,
-        lastName:req.body.lastName,
-        email:req.body.email,
-        password:req.body.password,
-        age:req.body.age,
-        gender:req.body.gender,
+    // do validation of data
+    // encrypt the password of user
+    // save the data in the database
+    try{
+        validateSignupData(req);
+
+        const password=req.body.password;
+        const hashedPassword=await bcrypt.hash(password , 17); // this will create a encrypted version of our password
+        console.log(hashedPassword);
+
+        const userobj={
+            firstName:req.body.firstName,
+            lastName:req.body.lastName,
+            email:req.body.email,
+            password:hashedPassword,
+            age:req.body.age,
+            gender:req.body.gender,
+        }
+        console.log(req.body);
+        const user=new UserModel(userobj); // we need to make one new instance of the model to save the data in the database
+        await user.save() // this will save the data in the database
+        res.send("signup successful");
+    }catch(err){
+    res.status(400).send(err.message);
+}
+});
+
+
+app.post("/login" , async (req , res)=>{
+    try{
+        const email=req.body.email;
+        const password=req.body.password;
+        loginValidation(req); // this will validate the email and password provided by the user
+        const user=await UserModel.findOne({email:email}); // this will find the user with the given email in the database
+        if(!user){
+            throw new Error("invalid credentials");
+        }
+        const isValidPassword=await bcrypt.compare(password , user.password);
+        if(!isValidPassword){
+            throw new Error("invalid credentials");
+        }
+        res.send("login successful");
+
+    }catch(err){
+        res.status(400).send(err.message);
     }
-    console.log(req.body);
-    const user=new UserModel(userobj); // we need to make one new instance of the model to save the data in the database
-    await user.save() // this will save the data in the database
-    res.send("signup successful");
-})
+});
 
 // connect to the database and start the server
 connectDB()

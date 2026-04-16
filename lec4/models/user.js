@@ -31,7 +31,7 @@ const userSchema=new mangoose.Schema({
         type:String,
         required:true,   
         minlength:8,   // this will make the password field have a minimum length of 6 characters
-        maxlength:50, // this will make the password field have a maximum length of 50 characters
+        maxlength:512, // this will make the password field have a maximum length of 50 characters
         validate(value){
             if(!validator.isStrongPassword(value)){
                 throw new Error("not a strong password");
